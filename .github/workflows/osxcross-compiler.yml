@@ -1,22 +1,10 @@
-name: OSX Cross Compiler CI
+name: OSXCross Compiler
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches:
-      - $default-branch
-      - dev/*
-
-  pull_request:
-    branches:
-      - $default-branch
+  workflow_dispatch:
 
 env:
   MACOS_SDK_VERSION: 13.0
-  CI_REGISTRY: docker.io
-  CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
-  CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
 
 jobs:
   build-cross-compiler:
@@ -26,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Prepare for build
+      - name: Prepare For Build
         run: |
           GITHUB_REPOSITORY=${{ github.repository }}
           echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >>"$GITHUB_ENV"
@@ -34,7 +22,7 @@ jobs:
           echo "OUT_TARBALL_PATH=$PWD/${GITHUB_REPOSITORY##*/}.tar.xz" >>"$GITHUB_ENV"
         shell: bash
 
-      - name: Building ...
+      - name: Build
         run: |
           cat <<'EOF' >"$PWD/action-ci-build.sh"
           OSX_CROSS_COMPILER="/workspace/${GITHUB_REPOSITORY##*/}"
@@ -55,7 +43,7 @@ jobs:
               --entrypoint=bash "ghcr.io/lcjuves/osx-cross-compiler-builder" -ex "/workspace/${GITHUB_REPOSITORY##*/}/action-ci-build.sh"
         shell: bash
 
-      - name: Publish compiler artifact
+      - name: Publish Artifact
         uses: softprops/action-gh-release@v1
         with:
           name: OSX Cross Compiler
@@ -63,19 +51,3 @@ jobs:
           prerelease: false
           files: |
             ${{ env.OUT_TARBALL_PATH }}
-
-      - name: Publish rustaceans docker image
-        if: ${{ github.repository == 'LcJuves/osx-cross-compiler' }}
-        run: |
-          git clone --depth 1 -b main https://github.com/LcJuves/podock.git
-          cd podock/rustaceans || exit
-          mv $OUT_TARBALL_PATH .
-          docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
-          docker pull "$CI_REGISTRY_USER/amuse-lang-environment:llvmenv-jit"
-          docker tag "$CI_REGISTRY_USER/amuse-lang-environment:llvmenv-jit" amuse-lang-environment:llvmenv-jit
-          docker build -t "$CI_REGISTRY_USER/rustaceans:jit" -f jit.Dockerfile .
-          docker push "$CI_REGISTRY_USER/rustaceans:jit"
-          docker tag "$CI_REGISTRY_USER/rustaceans:jit" rustaceans:jit
-          docker build -t "$CI_REGISTRY_USER/rustaceans" .
-          docker push "$CI_REGISTRY_USER/rustaceans"
-        shell: bash
