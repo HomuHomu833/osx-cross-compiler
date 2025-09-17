@@ -12,10 +12,10 @@ jobs:
       - name: Package MacOSX13.0.sdk
         run: |
           set -eux
-          SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk"
+          SDK_PATH="/Applications/Xcode_14.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk"
           if [ ! -d "$SDK_PATH" ]; then
             echo "SDK not found."
-            find / | grep "MacOSX13.0.sdk"
+            # find / | grep "MacOSX13.0.sdk"
             exit 1
           fi
           cp -R "$SDK_PATH" .
