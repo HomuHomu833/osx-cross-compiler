@@ -14,8 +14,8 @@ jobs:
           set -eux
           SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk"
           if [ ! -d "$SDK_PATH" ]; then
-            echo "SDK not found at $SDK_PATH"
-            xcodebuild -showsdks
+            echo "SDK not found."
+            ls /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
             exit 1
           fi
           cp -R "$SDK_PATH" .
