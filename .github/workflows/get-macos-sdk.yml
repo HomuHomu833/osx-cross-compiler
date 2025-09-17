@@ -1,0 +1,28 @@
+name: Get MacOS SDK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-13
+    steps:
+      # - uses: actions/checkout@v4
+
+      - name: Package MacOSX13.0.sdk
+        run: |
+          set -eux
+          SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk"
+          if [ ! -d "$SDK_PATH" ]; then
+            echo "SDK not found at $SDK_PATH"
+            xcodebuild -showsdks
+            exit 1
+          fi
+          cp -R "$SDK_PATH" .
+          tar -cJf MacOSX13.0.sdk.tar.xz MacOSX13.0.sdk
+          ls -lh MacOSX13.0.sdk.tar.xz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MacOSX13.0.sdk
+          path: MacOSX13.0.sdk.tar.xz
