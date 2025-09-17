@@ -92,11 +92,13 @@ INSTALLPREFIX=/opt/clang ./build_clang.sh  # Custom install path
 
 By default, this installs the osxcross toolchain into `<current-directory>/target`.  
 To specify a different installation path or run the build unattended,  
-set the `TARGET_DIR` and/or `UNATTENDED` environment variables accordingly.
+set the `TARGET_DIR` and/or `UNATTENDED` environment variables accordingly.  
+You can use `ENABLE_ARCHS` to restrict the build to a specific set of supported architectures  
+(e.g. `"arm64 x86_64"`).
 
 ```sh
 ./build.sh 
-[TARGET_DIR=/usr/local/osxcross] [OSX_VERSION_MIN=XX.X] [UNATTENDED=1] ./build.sh 
+[TARGET_DIR=/usr/local/osxcross] [OSX_VERSION_MIN=XX.X] [ENABLE_ARCHS="<ARCHS>"] [UNATTENDED=1] ./build.sh 
 ```
 
 Add `<target>/bin` to your `PATH` after installation.
@@ -141,7 +143,7 @@ SDKs can be extracted either from the full Xcode or from the Xcode Command Line 
 
 **From Command Line Tools**
 
-1. [Download Command Line Tools](https://developer.apple.com/download/more)
+1. [Download Command Line Tools](https://developer.apple.com/download/all/?q=Command%20Line%20Tools%20for%20Xcode)
 2. Mount the `Command_Line_Tools_for_Xcode.dmg` (Open With → DiskImageMounter)
 3. Install `Command Line Tools.pkg` (Open With → Installer)
 4. Run: `./tools/gen_sdk_package_tools.sh`
