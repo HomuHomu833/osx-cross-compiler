@@ -6,24 +6,31 @@ on:
 jobs:
   build:
     runs-on: macos-13
+    permissions:
+      contents: write
     steps:
-      # - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Package MacOSX13.0.sdk
         run: |
           set -eux
           SDK_PATH="/Applications/Xcode_14.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk"
-          for f in $SDK_PATH/usr/lib/*.tbd; do
-            dylib=$(sed -n "s/.*install-name:[[:space:]]*'\([^']*\)'.*/\1/p" "$f")
-            if [ -n "$dylib" ] && [ -f "$dylib" ]; then
-              echo "Copying $dylib"
-              cp -RL "$dylib" $SDK_PATH/
-            fi
-          done
+          cp -RL /usr/lib/libobjc.A.dylib $SDK_PATH/usr/lib
           tar -cJhf MacOSX13.0.sdk.tar.xz -C "$(dirname "$SDK_PATH")" "$(basename "$SDK_PATH")"
-          ls -lh MacOSX13.0.sdk.tar.xz
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: MacOSX13.0.sdk
-          path: MacOSX13.0.sdk.tar.xz
+      - name: Push MacOSX13.0.sdk
+        run: |
+          USER_INFO=$(curl -s "https://api.github.com/users/${{ github.actor }}")
+          USERID=$(echo "$USER_INFO" | jq -r '.id')
+          USERNAME=$(echo "$USER_INFO" | jq -r '.name')
+
+          mv MacOSX13.0.sdk.tar.xz tarballs
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add -f tarballs
+          git commit --author="${USERNAME} <${USERID}+$(echo "$USERNAME" | sed 's/ /-/g')@users.noreply.github.com>" -m "MacOSX13.0.sdk" || {
+              echo "Didn't commit anything, skipping git push."
+              exit 0
+          }
+          git push
