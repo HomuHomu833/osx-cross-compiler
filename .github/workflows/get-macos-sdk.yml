@@ -14,7 +14,8 @@ jobs:
 
       - name: Package MacOSX13.0.sdk
         run: |
-          set -eux
+          cd $HOME
+          # set -eux
           SDK_PATH="/Applications/Xcode_14.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk"
           cp -RL /usr/lib/libobjc.A.dylib $SDK_PATH/usr/lib
           tar -cJhf MacOSX13.0.sdk.tar.xz -C "$(dirname "$SDK_PATH")" "$(basename "$SDK_PATH")"
@@ -25,7 +26,7 @@ jobs:
           USERID=$(echo "$USER_INFO" | jq -r '.id')
           USERNAME=$(echo "$USER_INFO" | jq -r '.name')
 
-          mv MacOSX13.0.sdk.tar.xz tarballs
+          mv $HOME/MacOSX13.0.sdk.tar.xz tarballs
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git add -f tarballs
